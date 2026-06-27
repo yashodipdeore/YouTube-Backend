@@ -9,15 +9,16 @@ import userRoutes from './routes/user.routes.js';
 
 //===========================================
 dotenv.config();
+
 const app = express();
-app.use(express.json());
 ConnectDB();
+
+app.use(express.json());
+
 app.use('/api/v1/user', userRoutes);
 
 
 //=========== ROUTES ========================
-
-
 
 
 

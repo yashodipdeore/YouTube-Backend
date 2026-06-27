@@ -20,8 +20,12 @@
   },
   "homepage": "https://github.com/yashodipdeore/YouTube-Backend#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.3.0",
+    "cloudinary": "^2.10.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-fileupload": "^1.5.2",
     "mongoose": "^9.7.1"
   }
 }
