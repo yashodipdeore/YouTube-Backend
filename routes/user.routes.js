@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import mongoose from "mongoose";
 
 //------- Local modules -------
-import User from '../models/user.model.js';
+import userModel from '../models/user.model.js';
 import cloudinary from '../config/cloudinary.js';
 
 //===========================================
@@ -28,7 +28,7 @@ router.post('/signup', async (req, res) => {
 
 
     //Creating new user entry
-    const newUser = new User(
+    const newUser = new userModel(
       {
         _id: new mongoose.Types.ObjectId(),
         channelName: req.body.channelName,
@@ -47,14 +47,36 @@ router.post('/signup', async (req, res) => {
       user
     });
 
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(401).json({
-      //inserting new user entry to DB
-      message: err.message
+      error: 'Something went wrong',
+      message: error.message
     });
   };
 });
+
+
+router.post('/login', async (req, res) => {
+  try {
+
+    const existingUser = await User.findOne({ email: req.body.email });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        message: 'User not found !'
+      })
+    };
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Something went wrong',
+      message: error.message
+    });
+  }
+});
+
 
 
 
