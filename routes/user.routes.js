@@ -6,9 +6,9 @@ import jwt from 'jsonwebtoken';
 
 //------- Local modules -------
 import userModel from '../models/user.model.js';
+import videoModel from "../models/video.model.js";
 import cloudinary from '../config/cloudinary.js';
-import { jwtToken } from "../config/jwtSecret.js";
-
+import jwtToken from '../config/jwtSecret.js';
 
 //===========================================
 //------- Middlewares ------

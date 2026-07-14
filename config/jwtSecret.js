@@ -5,6 +5,4 @@ const jwtToken = {
 };
 
 
-export {
-  jwtToken,
-}
+export default jwtToken;
