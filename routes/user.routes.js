@@ -2,10 +2,13 @@ import express from "express";
 import { Router } from "express";
 import bcrypt from 'bcrypt';
 import mongoose from "mongoose";
+import jwt from 'jsonwebtoken';
 
 //------- Local modules -------
 import userModel from '../models/user.model.js';
 import cloudinary from '../config/cloudinary.js';
+import { jwtToken } from "../config/jwtSecret.js";
+
 
 //===========================================
 //------- Middlewares ------
@@ -15,6 +18,9 @@ const router = Router();
 //===========================================
 //-------- Routes -----------
 
+/*
+*  post /api/v1/user/signup
+*/
 router.post('/signup', async (req, res) => {
   try {
     //Password Encryption
@@ -22,10 +28,8 @@ router.post('/signup', async (req, res) => {
     console.log('Hashed password : ', hashedPassword);
 
     const uploadImage = await cloudinary.uploader.upload(
-      req.files.logoURL.tempFilePath
+      req.files.logoUrl.tempFilePath
     );
-    console.log('IMAGE ', uploadImage);
-
 
     //Creating new user entry
     const newUser = new userModel(
@@ -44,6 +48,7 @@ router.post('/signup', async (req, res) => {
     let user = await newUser.save();
 
     res.status(201).json({
+      message: '🟢 Signup successful 🟢',
       user
     });
 
@@ -56,22 +61,70 @@ router.post('/signup', async (req, res) => {
   };
 });
 
-
+/*
+*  post /api/v1/user/login
+*/
 router.post('/login', async (req, res) => {
   try {
+    //=====================
+    //check if user exists or not
+    const existingUser = await userModel.findOne({ email: req.body.email });
 
-    const existingUser = await User.findOne({ email: req.body.email });
-
+    //Error if user does not exists
     if (!existingUser) {
       return res.status(404).json({
-        message: 'User not found !'
-      })
+        message: '🔴 User not found ! 🔴'
+      });
     };
+
+
+
+    //=====================
+    //check if password entered by the use is correct or not
+    const isValid = await bcrypt.compare(req.body.password, existingUser.password)
+
+    //Error if password is wrong
+    if (!isValid) {
+      return res.status(400).json({
+        message: '🔴 Invalid Email Or Password 🔴'
+      });
+    };
+
+
+
+    //=====================
+    const token = jwt.sign(
+      {
+        _id: existingUser._id,
+        channelName: existingUser.channelName,
+        email: existingUser.email,
+        phone: existingUser.phone,
+        logoId: existingUser.logoId
+      },
+      jwtToken.secretKey,
+      {
+        expiresIn: '10d'
+      }
+    );
+    console.log('==== TOKEN ===== \n', token);
+    //Response if email and password is correct
+    res.status(200).json({
+      message: '🟢 Login successful 🟢',
+      _id: existingUser._id,
+      channelName: existingUser.channelName,
+      email: existingUser.email,
+      phone: existingUser.phone,
+      logoId: existingUser.logoId,
+      logoUrl: existingUser.logoUrl,
+      token: token,
+      subscribers: existingUser.subscribers,
+      subscribedChannels: existingUser.subscribedChannels
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: 'Something went wrong',
+      error: '🔴 Something went wrong 🔴',
       message: error.message
     });
   }
