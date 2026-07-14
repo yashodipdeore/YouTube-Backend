@@ -15,7 +15,7 @@ const videoRoutes = express.Router();
 
 
 //====================================================
-//Upload video
+//--------- Upload video -------------
 videoRoutes.post('/upload', checkAuth, async (req, res) => {
   try {
     //============================================================
@@ -83,7 +83,60 @@ videoRoutes.post('/upload', checkAuth, async (req, res) => {
   }
 });
 
+//----------- Update video-----------
+//(it will only change videos meta data like title, description, etc.,)
+videoRoutes.put('/update/:id', checkAuth, async (req, res) => {
+  try {
+    const { title, description, category, tags } = req.body;
+    const videoId = req.params.id;
 
+    //Find video by id
+    const video = await videoModel.findById(videoId);
+
+    //Error if video does not exists
+    if (!video) {
+      return res.status(404).json({
+        error: '🔴 Video not found 🔴'
+      });
+    };
+
+    console.log(video);
+
+    //Error if user is unauthorized
+    if (video.user_id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        error: '🔴 Unauthorized user 🔴'
+      });
+    };
+
+
+    //Updating thumbnail if requested 
+    if (req.files && req.files.thumbnail) {
+      await cloudinary.uploader.destroy(video.thumbnailId);
+
+      const thumbnailUpload = await cloudinary.uploader.upload(req.files.thumbnail.tempFilePath, { resource_type: 'image', folder: "thumbnail" });
+
+      video.thumbnailUrl = thumbnailUpload.secure_url;
+      video.thumbnailId = thumbnailUpload.public_id;
+    };
+
+    //Updating other metadata of video
+    video.title = title || video.title;
+    video.description = description || video.description;
+    video.category = category || video.category;
+    video.tags = tags || video.tags;
+
+    res.status(200).json({
+      message: '🟢 Video Updated successfully 🟢',
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: '🔴 Something went wrong 🔴',
+      message: error.message
+    });
+  };
+});
 
 
 
