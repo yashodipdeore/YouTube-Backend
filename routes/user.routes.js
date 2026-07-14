@@ -12,7 +12,7 @@ import jwtToken from '../config/jwtSecret.js';
 
 //===========================================
 //------- Middlewares ------
-const router = Router();
+const userRouters = express.Router();
 
 
 //===========================================
@@ -21,7 +21,7 @@ const router = Router();
 /*
 *  post /api/v1/user/signup
 */
-router.post('/signup', async (req, res) => {
+userRouters.post('/signup', async (req, res) => {
   try {
     //Password Encryption
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -64,7 +64,7 @@ router.post('/signup', async (req, res) => {
 /*
 *  post /api/v1/user/login
 */
-router.post('/login', async (req, res) => {
+userRouters.post('/login', async (req, res) => {
   try {
     //=====================
     //check if user exists or not
@@ -134,4 +134,4 @@ router.post('/login', async (req, res) => {
 
 
 //===========================================
-export default router;
+export default userRouters;

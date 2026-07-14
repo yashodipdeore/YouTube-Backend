@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 //--------- Local modules -----------------
 import { ConnectDB } from './config/db.config.js';
 import userRoutes from './routes/user.routes.js';
-
+import videoRoutes from './routes/video.routes.js';
 
 //===========================================
 dotenv.config(); // .env File configuration
@@ -27,6 +27,7 @@ app.use(fileUpload({
 
 //User Router
 app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/video', videoRoutes);
 
 
 //=========== ROUTES ========================
