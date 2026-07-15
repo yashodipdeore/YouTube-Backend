@@ -43,21 +43,6 @@ const videoSchema = new mongoose.Schema(
       trim: true,
     },
     ],
-    likes: {
-      type: String,
-      default: 0,
-      min: 0,
-    },
-    dislikes: {
-      type: String,
-      default: 0,
-      min: 0,
-    },
-    views: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
     likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     disLikedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
