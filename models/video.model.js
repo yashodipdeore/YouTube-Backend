@@ -43,9 +43,9 @@ const videoSchema = new mongoose.Schema(
       trim: true,
     },
     ],
-    likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-    disLikedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
-    viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    disLikedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true
@@ -63,7 +63,7 @@ videoSchema.virtual('dislikes').get(function () {
   return this.disLikedBy.length;
 });
 
-videoSchema.virtual('dislikes').get(function () {
+videoSchema.virtual('views').get(function () {
   return this.viewedBy.length;
 });
 
