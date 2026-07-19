@@ -15,6 +15,25 @@ const videoRoutes = express.Router();
 
 
 //====================================================
+//-------------- Get all videos -----------------
+videoRoutes.get('/', checkAuth, async (req, res) => {
+  const allVideos = await videoModel.find();
+
+  console.log('ALL videos');
+
+  console.log(allVideos);
+
+
+  res.status(200).json({
+    message: '🟢 All the videos are retrieved successfully 🟢',
+    allVideos
+  });
+});
+
+
+
+
+
 //--------- Upload video -------------
 videoRoutes.post('/upload', checkAuth, async (req, res) => {
   try {
@@ -83,6 +102,7 @@ videoRoutes.post('/upload', checkAuth, async (req, res) => {
   }
 });
 
+
 //----------- Update video-----------
 //(it will only change videos meta data like title, description, etc.,)
 videoRoutes.put('/update/:id', checkAuth, async (req, res) => {
@@ -139,12 +159,12 @@ videoRoutes.put('/update/:id', checkAuth, async (req, res) => {
 });
 
 
-//Delete Video by id
+//------------ Delete Video by id -----------------
 videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
-  const videoId = req.params;
+  const videoId = req.params.id;
 
   //Check if video exist or not
-  const video = videoModel.findById(videoId);
+  const video = await videoModel.findById(videoId);
 
   //Error if video does not exists
   if (!video) {
@@ -154,7 +174,7 @@ videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
   };
 
   // Error : Ensure only the video owner can delete the video
-  if (!video.user_id === req.user._id) {
+  if (!video.user_id === videoId) {
     return res.status(400).json({
       Error: '🔴You don\'t have access to delete the video 🔴'
     });
@@ -162,7 +182,7 @@ videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
 
   const deletedVideo = await videoModel.deleteOne(
     {
-      _id: video._id
+      _id: videoId
     }
   );
 
@@ -173,13 +193,6 @@ videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
     }
   );
 });
-
-
-
-
-//get all video
-
-
 
 
 //my video
