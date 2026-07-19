@@ -19,10 +19,6 @@ const videoRoutes = express.Router();
 videoRoutes.get('/', checkAuth, async (req, res) => {
   const allVideos = await videoModel.find();
 
-  console.log('ALL videos');
-
-  console.log(allVideos);
-
 
   res.status(200).json({
     message: '🟢 All the videos are retrieved successfully 🟢',
@@ -31,10 +27,20 @@ videoRoutes.get('/', checkAuth, async (req, res) => {
 });
 
 
+//----------------- Get all my videos --------------
+videoRoutes.get('/my-videos', checkAuth, async (req, res) => {
+  const myVideos = await videoModel.find({
+    user_id: req.user._id
+  });
+
+  res.status(200).json({
+    message: '🟢 All the videos of user are retrieved successfully 🟢',
+    myVideos
+  });
+});
 
 
-
-//--------- Upload video -------------
+//--------- Upload video --------------------------
 videoRoutes.post('/upload', checkAuth, async (req, res) => {
   try {
     //============================================================
@@ -103,7 +109,7 @@ videoRoutes.post('/upload', checkAuth, async (req, res) => {
 });
 
 
-//----------- Update video-----------
+//----------- Update video----------------------
 //(it will only change videos meta data like title, description, etc.,)
 videoRoutes.put('/update/:id', checkAuth, async (req, res) => {
   try {
@@ -195,7 +201,8 @@ videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
 });
 
 
-//my video
+
+
 
 //get video by id
 
