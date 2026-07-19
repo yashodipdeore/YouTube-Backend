@@ -139,6 +139,54 @@ videoRoutes.put('/update/:id', checkAuth, async (req, res) => {
 });
 
 
+//Delete Video by id
+videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
+  const videoId = req.params;
+
+  //Check if video exist or not
+  const video = videoModel.findById(videoId);
+
+  //Error if video does not exists
+  if (!video) {
+    return res.status(400).json({
+      Error: '🔴 Video not found 🔴'
+    });
+  };
+
+  // Error : Ensure only the video owner can delete the video
+  if (!video.user_id === req.user._id) {
+    return res.status(400).json({
+      Error: '🔴You don\'t have access to delete the video 🔴'
+    });
+  };
+
+  const deletedVideo = await videoModel.deleteOne(
+    {
+      _id: video._id
+    }
+  );
+
+  res.status(200).json(
+    {
+      message: '🟢 Video successfully deleted 🟢',
+      deletedVideo
+    }
+  );
+});
+
+
+
+
+//get all video
+
+
+
+
+//my video
+
+//get video by id
+
+//like 
 
 
 //====================================================
