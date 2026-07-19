@@ -194,6 +194,8 @@ videoRoutes.put('/update/:id', checkAuth, async (req, res) => {
     video.category = category || video.category;
     video.tags = tags || video.tags;
 
+    await video.save();
+
     res.status(200).json({
       message: '🟢 Video Updated successfully 🟢',
     });
@@ -234,6 +236,8 @@ videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
     }
   );
 
+  await deletedVideo.save();
+
   res.status(200).json(
     {
       message: '🟢 Video successfully deleted 🟢',
@@ -243,7 +247,43 @@ videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
 });
 
 
-//like 
+//--------- Like video by id----------------
+videoRoutes.post('/:id/like', checkAuth, async (req, res) => {
+  const videoId = req.params.id;
+  const userId = req.user._id;
+
+  const video = await videoModel.findById(videoId);
+
+  //Error : if video not found
+  if (!video) {
+    return res.status(404).json({
+      Error: '🔴 Video not found 🔴'
+    });
+  };
+
+  //Error: if video is already liked
+  if (video.likedBy.includes(userId)) {
+    return res.status(400).json({
+      Error: 'You have already liked the video'
+    });
+  };
+
+
+  await video.disLikedBy.pull(userId);
+
+
+  await video.likedBy.push(userId);
+
+
+  await video.save();
+
+  res.status(200).json({
+    message: '🟢 Video liked successfully 🟢',
+    video,
+    totalLikes: video.likes
+  });
+});
+
 
 
 //====================================================
