@@ -19,6 +19,11 @@ const videoRoutes = express.Router();
 videoRoutes.get('/', checkAuth, async (req, res) => {
   const allVideos = await videoModel.find();
 
+  if (!allVideos) {
+    return res.status(400).json({
+      Error: '🔴 Videos not found 🔴'
+    });
+  };
 
   res.status(200).json({
     message: '🟢 All the videos are retrieved successfully 🟢',
@@ -33,9 +38,41 @@ videoRoutes.get('/my-videos', checkAuth, async (req, res) => {
     user_id: req.user._id
   });
 
+  if (!myVideos) {
+    return res.status(400).json({
+      Error: '🔴 Video not found 🔴'
+    });
+  };
+
   res.status(200).json({
     message: '🟢 All the videos of user are retrieved successfully 🟢',
     myVideos
+  });
+});
+
+
+//----------- Get video by id ------------------------
+videoRoutes.get('/:id', checkAuth, async (req, res) => {
+  const videoId = req.params.id;
+  if (!videoId) {
+    return res.status(400).json({
+      Error: '🔴 Video id is not provided 🔴'
+    });
+  };
+
+  const video = await videoModel.findById({
+    _id: videoId
+  });
+
+  if (!video) {
+    return res.status(400).json({
+      Error: '🔴 Video not Found 🔴'
+    });
+  };
+
+  res.status(200).json({
+    message: 'Video found',
+    video
   });
 });
 
@@ -115,6 +152,11 @@ videoRoutes.put('/update/:id', checkAuth, async (req, res) => {
   try {
     const { title, description, category, tags } = req.body;
     const videoId = req.params.id;
+    if (!videoId) {
+      return res.status(404).json({
+        error: '🔴 Video Id is not provided 🔴'
+      });
+    };
 
     //Find video by id
     const video = await videoModel.findById(videoId);
@@ -200,11 +242,6 @@ videoRoutes.delete('/delete/:id', checkAuth, async (req, res) => {
   );
 });
 
-
-
-
-
-//get video by id
 
 //like 
 
