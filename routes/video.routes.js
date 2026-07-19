@@ -285,6 +285,39 @@ videoRoutes.post('/:id/like', checkAuth, async (req, res) => {
 });
 
 
+//--------- dislike video by id------------
+videoRoutes.post('/:id/dislike', checkAuth, async (req, res) => {
+  const videoId = req.params.id;
+  const userId = req.user._id;
+
+  const video = await videoModel.findById(videoId);
+
+  if (!video) {
+    return res.status(404).json({
+      Error: '🔴 Video not found 🔴'
+    });
+  };
+
+
+  if (video.disLikedBy.includes(userId)) {
+    return res.status(400).json({
+      Error: '🔴 You have already disliked the video 🔴'
+    });
+  };
+
+  await video.likedBy.pull(userId);
+
+  await video.disLikedBy.push(userId);
+
+  await video.save();
+
+  res.status(200).json({
+    message: '🟢 video disliked successfully🟢',
+    video,
+    Total_disliked: video.disLikes
+  });
+});
+
 
 //====================================================
 export default videoRoutes;
