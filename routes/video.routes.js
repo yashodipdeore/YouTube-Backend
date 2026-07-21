@@ -55,25 +55,12 @@ videoRoutes.get('/my-videos', checkAuth, async (req, res) => {
 //----------- Get video by id ------------------------
 videoRoutes.get('/:id', checkAuth, async (req, res) => {
   const videoId = req.params.id;
-  if (!videoId) {
-    return res.status(400).json({
-      Error: '🔴 Video id is not provided 🔴'
-    });
-  };
+  const userId = req.user._id;
 
-  const video = await videoModel.findByIdAndUpdate(
-    videoId,
-    {
-      $addToSet: {
-        viewedBy: req.user._id
-      }
-    },
-    {
-      new: true
-    }
-  );
+  //Search for video by id
+  const video = await videoModel.findById(videoId);
 
-
+  //Error is video not found
   if (!video) {
     return res.status(400).json({
       Error: '🔴 Video not Found 🔴'
@@ -81,6 +68,13 @@ videoRoutes.get('/:id', checkAuth, async (req, res) => {
   };
 
 
+  //check f=if video is already viewed or not
+  if (!video.viewedBy.some(id => id.equals(userId))) {
+    video.viewedBy.push(userId);
+    await video.save();
+  }
+
+  //response
   res.status(200).json({
     message: 'Video found',
     video
@@ -358,7 +352,7 @@ videoRoutes.get('/category/:category', checkAuth, async (req, res) => {
   });
 });
 
-//----------- Get video by tags ----------------
+//-------------- Get video by tags ----------------
 videoRoutes.get('/tags/:tag', async (req, res) => {
   const tag = req.params.tag;
   const allVideos = await videoModel.find();
@@ -389,7 +383,7 @@ videoRoutes.get('/tags/:tag', async (req, res) => {
 });
 
 
-//--------
+//--------------  
 
 
 //====================================================
