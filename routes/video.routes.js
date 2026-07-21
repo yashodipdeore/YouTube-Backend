@@ -2,6 +2,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { Router } from 'express';
+import Fuse from 'fuse.js';
 
 //===== Local Modules ========
 import userModel from '../models/user.model.js';
@@ -315,6 +316,35 @@ videoRoutes.post('/:id/dislike', checkAuth, async (req, res) => {
     message: '🟢 video disliked successfully🟢',
     video,
     Total_disliked: video.disLikes
+  });
+});
+
+
+//-------------- Get video by category ------------
+videoRoutes.get('/category/:category', checkAuth, async (req, res) => {
+  const category = req.params.category;
+
+  const allVideos = await videoModel.find();
+  const fuse = new Fuse(allVideos, {
+    keys: ["category"],
+    threshold: 0.4
+  });
+
+  const results = fuse.search(category);
+  const videos = results.map(result => result.item);
+
+  //Error if no category or video found
+  if (!category || !videos || videos.length < 1) {
+    return res.status(404).json(
+      {
+        Error: `🔴 No video found in the ${category} category 🔴`
+      }
+    );
+  };
+
+  res.status(200).json({
+    message: '🟢 videos found 🟢',
+    videos
   });
 });
 
