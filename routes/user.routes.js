@@ -9,18 +9,18 @@ import userModel from '../models/user.model.js';
 import videoModel from "../models/video.model.js";
 import cloudinary from '../config/cloudinary.js';
 import jwtToken from '../config/jwtSecret.js';
+//----- Middleware
+import { checkAuth } from "../middleware/auth.middleware.js";
+
 
 //===========================================
 //------- Middlewares ------
 const userRouters = express.Router();
 
-
 //===========================================
-//-------- Routes -----------
+//---------------- Routes -------------------
 
-/*
-*  post /api/v1/user/signup
-*/
+//------------ post /api/v1/user/signup------------
 userRouters.post('/signup', async (req, res) => {
   try {
     //Password Encryption
@@ -61,9 +61,8 @@ userRouters.post('/signup', async (req, res) => {
   };
 });
 
-/*
-*  post /api/v1/user/login
-*/
+
+//-------- post /api/v1/user/login ----------
 userRouters.post('/login', async (req, res) => {
   try {
     //=====================
@@ -131,6 +130,38 @@ userRouters.post('/login', async (req, res) => {
 });
 
 
+//--------- Update Route ------------------
+userRouters.put('/update-profile', checkAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { channelName, phone } = req.body;
+    const updatedData = {
+      channelName,
+      phone
+    };
+
+    if (req.files && req.files.logoUrl) {
+      const uploadedImage = await cloudinary.uploader.upload(req.files.logoUrl.tempFilePath);
+
+      updatedData.logoUrl = uploadedImage.secure_url;
+      updatedData.logoId = uploadedImage.public_id;
+    };
+
+    const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData, { new: true });
+
+    res.status(200).json({
+      message: '🟢 User profile updated successfully 🟢',
+      updatedUser
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'Something went wrong',
+      message: error.message
+    });
+  };
+});
 
 
 //===========================================
