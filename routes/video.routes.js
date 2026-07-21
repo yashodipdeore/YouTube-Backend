@@ -348,6 +348,36 @@ videoRoutes.get('/category/:category', checkAuth, async (req, res) => {
   });
 });
 
+//----------- Get video by tags ----------------
+videoRoutes.get('/tags/:tag', async (req, res) => {
+  const tag = req.params.tag;
+  const allVideos = await videoModel.find();
+
+  const fuse = new Fuse(allVideos, {
+    keys: ["tags"],
+    threshold: 0.4
+  });
+
+  const results = fuse.search(tag);
+  const videos = results.map(result => result.item);
+
+  //Error if no category or video found
+  if (!tag || !videos || videos.length < 1) {
+    return res.status(404).json(
+      {
+        Error: `🔴 No video found in the ${tag}  🔴`
+      }
+    );
+  };
+
+
+  res.status(200).json({
+    message: '🟢 videos found 🟢',
+    videos
+  });
+
+});
+
 
 //====================================================
 export default videoRoutes;
