@@ -61,15 +61,25 @@ videoRoutes.get('/:id', checkAuth, async (req, res) => {
     });
   };
 
-  const video = await videoModel.findById({
-    _id: videoId
-  });
+  const video = await videoModel.findByIdAndUpdate(
+    videoId,
+    {
+      $addToSet: {
+        viewedBy: req.user._id
+      }
+    },
+    {
+      new: true
+    }
+  );
+
 
   if (!video) {
     return res.status(400).json({
       Error: '🔴 Video not Found 🔴'
     });
   };
+
 
   res.status(200).json({
     message: 'Video found',
@@ -377,6 +387,9 @@ videoRoutes.get('/tags/:tag', async (req, res) => {
   });
 
 });
+
+
+//--------
 
 
 //====================================================
