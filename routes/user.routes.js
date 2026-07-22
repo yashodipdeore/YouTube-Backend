@@ -164,5 +164,60 @@ userRouters.put('/update-profile', checkAuth, async (req, res) => {
 });
 
 
+//------------ Subscribe ------------------
+userRouters.post('/subscribe', checkAuth, async (req, res) => {
+  try {
+    //current/Logged in user's  "user id"
+    const userId = req.user._id;
+
+    //Channel/user to subscribe
+    const channelId = req.body.channelId;
+
+    //Error is  user tries to subscribe his/her own channel
+    if (userId.toString() === channelId) {
+      return res.status(400).json({
+        error: "You cannot subscribe to your own channel"
+      });
+    };
+
+
+    //Adding subscribed channel to current users subscribed channels list
+    const currentUser = await userModel.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: {
+          subscribedChannels: channelId
+        }
+      }
+    );
+
+    //Adding current user as subscriber to the channel
+    const subscribedUser = await userModel.findByIdAndUpdate(
+      channelId,
+      {
+        $addToSet: {
+          subscribers: userId
+        }
+      }
+    );
+
+    res.status(200).json({
+      message: `🟢 subscribed to ${channel.channelNam}🟢`,
+      currentUser,
+      subscribedUser
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'something went wrong',
+      message: error.message
+    });
+  };
+});
+
+
+
+
 //===========================================
-export default userRouters;
+export default userRouters; 
