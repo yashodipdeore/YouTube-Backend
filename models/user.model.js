@@ -29,14 +29,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  subscribers: {
-    type: Number,
-    default: 0
-  },
-  subscribedChannels: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }]
+  subscribers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  ],
+
+  subscribedChannels: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
+  ]
 }, { timestamps: true });
 
 
