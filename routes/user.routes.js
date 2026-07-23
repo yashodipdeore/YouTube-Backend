@@ -12,7 +12,6 @@ import jwtToken from '../config/jwtSecret.js';
 //----- Middleware
 import { checkAuth } from "../middleware/auth.middleware.js";
 
-
 //===========================================
 //------- Middlewares ------
 const userRouters = express.Router();
@@ -188,6 +187,9 @@ userRouters.post('/subscribe', checkAuth, async (req, res) => {
         $addToSet: {
           subscribedChannels: channelId
         }
+      },
+      {
+        new: true
       }
     );
 
@@ -198,11 +200,14 @@ userRouters.post('/subscribe', checkAuth, async (req, res) => {
         $addToSet: {
           subscribers: userId
         }
+      },
+      {
+        new: true
       }
     );
 
     res.status(200).json({
-      message: `🟢 subscribed to ${channel.channelNam}🟢`,
+      message: `🟢 subscribed to ${subscribedUser.channelName}🟢`,
       currentUser,
       subscribedUser
     });
@@ -216,6 +221,53 @@ userRouters.post('/subscribe', checkAuth, async (req, res) => {
   };
 });
 
+//------------Un-subscribe -----------------
+userRouters.put('/unsubscribe', checkAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const channelId = req.body.channelId;
+
+    //Removing the channel from current users account subscribed channels list
+    const currentUser = await userModel.findByIdAndUpdate(
+      userId,
+      {
+        $pull: {
+          subscribedChannels: channelId
+        }
+      },
+      {
+        new: true
+      }
+    );
+
+    //Unsubscribing the channel
+    const unsubscribedUser = await userModel.findByIdAndUpdate(
+      channelId,
+      {
+        $pull: {
+          subscribers: userId
+        }
+      },
+      {
+        new: true
+      }
+    );
+
+    res.status(200).json({
+      'message': `🟢 Unsubscribed to ${unsubscribedUser.channelName}🟢`,
+      currentUser,
+      unsubscribedUser
+    });
+
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'Something went wrong',
+      message: error.message
+    });
+  };
+});
 
 
 
