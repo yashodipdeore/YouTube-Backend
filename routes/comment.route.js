@@ -50,6 +50,30 @@ commentRoute.post('/new', checkAuth, async (req, res) => {
 });
 
 
+commentRoute.delete('/:commentId', checkAuth, async (req, res) => {
+  try {
+    const result = await commentModel.findOneAndDelete({
+      _id: req.params.commentId,
+      user_id: req.user._id,
+    });
+
+    if (!result) {
+      return res.status(404).json({
+        error: "Comment not found or you are not authorized",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Comment deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'Something went wrong',
+      message: error.message
+    });
+  }
+});
 
 
 
