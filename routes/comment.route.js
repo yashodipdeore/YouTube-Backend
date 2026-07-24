@@ -76,6 +76,46 @@ commentRoute.delete('/:commentId', checkAuth, async (req, res) => {
 });
 
 
+commentRoute.put('/:commentId', checkAuth, async (req, res) => {
+  try {
+    const { commentText } = req.body;
+
+    const UpdatedComment = await commentModel.findOneAndUpdate(
+      {
+        _id: req.params.commentId,
+        user_id: req.user._id
+      },
+      {
+        $set: {
+          commentText: commentText
+        }
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    //Error if user if Unauthorized or comment not found
+    if (!UpdatedComment) {
+      return res.status(404).json({
+        error: "Comment not found or you are not authorized",
+      });
+    };
+
+    res.status(200).json({
+      message: 'Comment updated successfully'
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: error,
+      message: error.message
+    });
+  }
+});
+
 
 //-------------------------------------------------
 export default commentRoute;
