@@ -117,5 +117,35 @@ commentRoute.put('/:commentId', checkAuth, async (req, res) => {
 });
 
 
+commentRoute.get('/comments/:videoId', checkAuth, async (req, res) => {
+  try {
+    const videoId = req.params.videoId;
+
+    const allComments = await commentModel.find(
+      {
+        video_id: videoId
+      }
+    );
+
+    if (!allComments) {
+      return res.status(404).json({
+        error: 'No comments found for this video'
+      });
+    };
+
+    res.status(200).json({
+      message: 'Comments found',
+      allComments
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: error,
+      message: error.message
+    });
+  };
+});
+
+
 //-------------------------------------------------
 export default commentRoute;
